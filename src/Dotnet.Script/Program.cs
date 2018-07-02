@@ -48,7 +48,7 @@ namespace Dotnet.Script
                                          || arg == DebugFlagLong)
                           ? e.ToString()
                           : e.GetBaseException().Message;
-                Console.Error.WriteLine(error);
+                ScriptConsole.Default.WritePrettyError(error);
                 return 0x1;
             }
         }

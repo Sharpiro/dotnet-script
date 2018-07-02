@@ -23,10 +23,10 @@ namespace Dotnet.Script.Core
         }
 
         public void InitializerFolder(string fileName, string currentWorkingDirectory)
-        {            
+        {
             CreateLaunchConfiguration(currentWorkingDirectory);
             CreateOmniSharpConfigurationFile(currentWorkingDirectory);
-            CreateScriptFile(fileName, currentWorkingDirectory);            
+            CreateScriptFile(fileName, currentWorkingDirectory);
         }
 
         public void CreateNewScriptFile(string fileName, string currentDirectory)
@@ -103,9 +103,17 @@ namespace Dotnet.Script.Core
             _logger.Log("Creating VS Code launch configuration file");
             string pathToLaunchFile = Path.Combine(vsCodeDirectory, "launch.json");
             string installLocation = _scriptEnvironment.InstallLocation;
+            _logger.Verbose($"Raw install location: '{installLocation}");
+            var userProfilePath = Environment.GetEnvironmentVariable("userprofile");
+            if (!string.IsNullOrEmpty(userProfilePath) && installLocation.StartsWith(userProfilePath))
+            {
+                installLocation = "${env:userprofile}" + installLocation.Substring(userProfilePath.Length);
+                _logger.Verbose($"Modified install location: '{installLocation}");
+            }
+
             string dotnetScriptPath = Path.Combine(installLocation, "dotnet-script.dll").Replace(@"\", "/");
             if (!File.Exists(pathToLaunchFile))
-            {                
+            {
                 string lauchFileTemplate = TemplateLoader.ReadTemplate("launch.json.template");
                 string launchFileContent = lauchFileTemplate.Replace("PATH_TO_DOTNET-SCRIPT", dotnetScriptPath);
                 File.WriteAllText(pathToLaunchFile, launchFileContent);
